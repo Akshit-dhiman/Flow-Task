@@ -11,8 +11,21 @@ const errorMiddleware = require("./middleware/error.middleware");
 const app = express();
 
 // Middleware
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin) || process.env.CLIENT_URL === "*") {
+      return callback(null, true);
+    }
+    return callback(null, true); // Allow all in production for now
+  },
   credentials: true,
 }));
 app.use(express.json());
