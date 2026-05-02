@@ -50,8 +50,18 @@ app.use((req, res) => {
 app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  // Auto-seed demo users in production
+  if (process.env.NODE_ENV === "production") {
+    try {
+      const { execSync } = require("child_process");
+      execSync("node prisma/seed.js", { cwd: __dirname + "/..", stdio: "inherit" });
+      console.log("✅ Seed completed");
+    } catch (e) {
+      console.log("⚠️ Seed skipped (may already exist):", e.message);
+    }
+  }
 });
 
 module.exports = app;
